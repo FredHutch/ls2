@@ -7,16 +7,16 @@ The Life Sciences Software (LS2) project aims to normalize the build of software
 ## Components
 LS2 is a collection of open source components:
 
-* We use <https://easybuilders.github.io/easybuild> to compile software packages and provide reproducibility.
-* EasyBuild uses Environment Modules to manage software packages, and LS2 uses <https://github.com/TACC/Lmod> to provide Environment Modules.
-* LS2 can produce <https://www.docker.com/ "Docker"> containers with one or more software packages.
-* LS2 uses <https://www.ubuntu.com "Ubuntu"> as its primary platform, and creates Docker containers based on Ubuntu containers. Note that EasyBuild uses CentOS as their primary platform, and extending LS2 to CentOS would likely be pretty easy.
+* We use [EasyBuild](https://easybuilders.github.io/easybuild) to compile software packages and provide reproducibility.
+* EasyBuild uses Environment Modules to manage software packages, and LS2 uses [Lmod](https://github.com/TACC/Lmod) to provide Environment Modules.
+* LS2 can produce [Docker](https://www.docker.com) containers with one or more software packages.
+* LS2 uses [Ubuntu](https://www.ubuntu.com) as its primary platform, and creates Docker containers based on Ubuntu containers. Note that EasyBuild uses CentOS as their primary platform, and extending LS2 to CentOS would likely be pretty easy.
 
 ## LS2 Architecture
 This is the hierarchy of LS2 containers:
 
 Name/Repo | FROM | Reason | Notes
---- | --- | ---
+--- | --- | --- | ---
 <https://github.com/FredHutch/ls2_ubuntu> | ubuntu | simple 'freeze' of the public ubuntu container | OS pkgs added: bash, curl, git
 <https://github.com/FredHutch/ls2_easybuild> | ls2_ubuntu | Adding EasyBuild and Lmod | OS pkgs added: python, lua
 <https://github.com/FredHutch/ls2_easybuild_foss> | ls2_easybuild | Adding the 'foss' toolchain | OS pkgs added: libibverbs-dev, lib6c-dev, bzip2, unzip, make, xz-utils
