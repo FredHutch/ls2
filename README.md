@@ -5,30 +5,28 @@ Life Sciences Software
 The Life Sciences Software (LS2) project aims to normalize the build of software packages across multiple technologies.
 
 ## Components
-LS2 is a collection of open source components.
+LS2 is a collection of open source components:
 
-*[EasyBuild](https://easybuilders.github.io/easybuild/)
-  *We use EasyBuild to compile software packages and provide reproducibility.
-*[Lmod](https://github.com/TACC/Lmod)
-  *EasyBuild uses Environment Modules to manage software packages, and LS2 uses Lmod to provide Environment Modules.
-*[Docker](https://www.docker.com/)
-  *LS2 can produce Docker containers with one or more software packages.
-*[Ubuntu](https://www.ubuntu.com/)
-  *LS2 uses Ubuntu as its primary platform, and creates Docker containers based on Ubuntu containers. Note that EasyBuild uses CentOS as their primary platform, and extending LS2 to CentOS would likely be pretty easy.
+* We use <https://easybuilders.github.io/easybuild> to compile software packages and provide reproducibility.
+* EasyBuild uses Environment Modules to manage software packages, and LS2 uses <https://github.com/TACC/Lmod> to provide Environment Modules.
+* LS2 can produce <https://www.docker.com/ "Docker"> containers with one or more software packages.
+* LS2 uses <https://www.ubuntu.com "Ubuntu"> as its primary platform, and creates Docker containers based on Ubuntu containers. Note that EasyBuild uses CentOS as their primary platform, and extending LS2 to CentOS would likely be pretty easy.
 
 ## LS2 Architecture
 This is the hierarchy of LS2 containers:
 
 Name/Repo | FROM | Reason | Notes
 --- | --- | ---
-[ls2_ubuntu](https://github.com/FredHutch/ls2_ubuntu) | ubuntu | simple 'freeze' of the public ubuntu container | OS pkgs added: bash, curl, git
-[ls2_easybuild](https://github.com/FredHutch/ls2_easybuild) | ls2_ubuntu | Adding EasyBuild and Lmod | OS pkgs added: python, lua
-[ls2_easybuild_foss](https://github.com/FredHutch/ls2_easybuild_foss) | ls2_easybuild | Adding the 'foss' toolchain | OS pkgs added: libibverbs-dev, lib6c-dev, bzip2, unzip, make, xz-utils
-[ls2](https://github.com/FredHutch/ls2) | ls2_easybuild_foss | This 'demo' repo | does not produce a container directly
-[ls2_r](https://github.com/FredHutch/ls2_r) | ls2_easybuild_foss | Our 'R' build | OS pkgs added: awscli
+<https://github.com/FredHutch/ls2_ubuntu> | ubuntu | simple 'freeze' of the public ubuntu container | OS pkgs added: bash, curl, git
+<https://github.com/FredHutch/ls2_easybuild> | ls2_ubuntu | Adding EasyBuild and Lmod | OS pkgs added: python, lua
+<https://github.com/FredHutch/ls2_easybuild_foss> | ls2_easybuild | Adding the 'foss' toolchain | OS pkgs added: libibverbs-dev, lib6c-dev, bzip2, unzip, make, xz-utils
+<https://github.com/FredHutch/ls2> | ls2_easybuild_foss | This 'demo' repo | does not produce a container directly
+<https://github.com/FredHutch/ls2_r> | ls2_easybuild_foss | Our 'R' build | OS pkgs added: awscli
 
 ### Tags
-In general, tagging goes: fredhutch/ls2_<package name>:<package version>[_<date>].
+In general, tagging goes: `fredhutch/ls2_<package name>:<package version>[_<date>]`
+
+Ex: `fredhutch/ls2_r:3.4.3` or `fredhutch/ls2_ubuntu:16.04_20180118`
 
 ## Container Architecture
 * default user 'neo' (UID 500, GID 500) /home/neo
@@ -65,6 +63,7 @@ Steps to build a new LS2 container are pretty straight-forward, but assume some 
   1. create a new repo in github and do not pre-populate with README.md - this should get you the 'Quick setup' page
   1. `git clone --bare https://github.com/FredHutch/ls2.git` (or `git clone --bare ssh://git@github.com/FredHutch/ls2.git`)
   1. `cd ls2.git`
+  1. edit README.md
   1. `git push --mirror https://github.com/<new repo URL.git>`
   1. `cd ..`
   1. `rm -rf ls2.git`
