@@ -28,6 +28,8 @@ In general, tagging goes: `fredhutch/ls2_<package name>:<package version>[_<date
 
 Ex: `fredhutch/ls2_r:3.4.3` or `fredhutch/ls2_ubuntu:16.04_20180118`
 
+Package versions should generally be the released version, and use the optional 'date' area for private sub-versions.
+
 ## Container Architecture
 * default user 'neo' (UID 500, GID 500) /home/neo
 * Lmod and EasyBuild are installed into /app
@@ -59,24 +61,35 @@ There are two sections here. First case covers building an existing or new EasyC
 ## First Copy and Edit
 Steps to build a new LS2 container are pretty straight-forward, but assume some knowledge of EasyBuild, Lmod, and Docker.
 
-1. Copy this repo per [these instructions](https://help.github.com/articles/duplicating-a-repository/):
-  1. create a new repo in github and do not pre-populate with README.md - this should get you the 'Quick setup' page
-  1. `git clone --bare https://github.com/FredHutch/ls2.git` (or `git clone --bare ssh://git@github.com/FredHutch/ls2.git`)
-  1. `cd ls2.git`
-  1. edit README.md
-  1. `git push --mirror https://github.com/<new repo URL.git>`
-  1. `cd ..`
-  1. `rm -rf ls2.git`
-1. Add required EasyConfig files that are not in the EasyBuild repo to /easyconfigs in new repo
-1. Add sources to the sources/ folder of the repo (for sources <50MB in size that cannot easily be downloaded)
-1. Add URLs to sources/download_sources.sh to download sources during `docker build` (for larger sources, perhaps placed in the cloud for easier download)
-1. Edit the Dockerfile to adjust the following:
-  * EASYCONFIG_NAME - this is the name of the package to be built
-  * INSTALL_OS_PKGS - these packages will be installed (by root) prior to running EasyBuild
-  * UNINSTALL_OS_PKGS - these packages will be uninstalled at the end of running EasyBuild
-1. Run `docker build --target ls2 -t <tag>`
+Copy this repo per [these instructions](https://help.github.com/articles/duplicating-a-repository/):
+1. create a new repo in github and do not pre-populate with README.md - this should get you the 'Quick setup' page
+1. `git clone --bare https://github.com/FredHutch/ls2.git` (or `git clone --bare ssh://git@github.com/FredHutch/ls2.git`)
+1. `cd ls2.git`
+1. edit README.md
+1. `git push --mirror https://github.com/<new repo URL.git>`
+1. `cd ..`
+1. `rm -rf ls2.git`
 
-## Second Add to /app
+At this point, there are two options:
+*  Building an existing easyconfig from the [EasyBuild EasyConfig Repo](https://github.com/easybuilders/easybuild-easyconfigs)
+  1. Edit the Dockerfile to adjust the following:
+    * EASYCONFIG_NAME - this is the name of the package to be built
+    * INSTALL_OS_PKGS - these packages will be installed (by root) prior to running EasyBuild (use this for 'osdependencies')
+  1. Run `docker build . --target ls2 -t <tag>` (ensure you are logged into Dockerhub by running `docker login`)
+  1. Run `docker push <tag>`
+
+* Building a custom Easyconfig
+  1. Add required EasyConfig files that are not in the EasyBuild repo to /easyconfigs in new repo
+  1. Add sources to the sources/ folder of the repo (for sources <50MB in size that cannot easily be downloaded)
+  1. Add URLs to sources/download_sources.sh to download sources during `docker build` (for larger sources, perhaps placed in the cloud for easier download)
+  1. Edit the Dockerfile to adjust the following:
+    * EASYCONFIG_NAME - this is the name of the package to be built
+    * INSTALL_OS_PKGS - these packages will be installed (by root) prior to running EasyBuild
+    * UNINSTALL_OS_PKGS - these packages will be uninstalled at the end of running EasyBuild
+  1. Run `docker build . --target ls2 -t <tag>` (ensure you are logged in to Dockerhub by running `docker login`)
+  1. Run `docker push <tag>`
+
+## Second Add to /app (FYI - Work In Progress 01.24.2018)
 We keep our deployed software package on an NFS volume that we mount at /app on our systems (can you guess why LS2 builds into /app rather than .local in the container?). In order to use your recently build LS2 software package container to deploy the same package into our /app NFS volume, use these steps:
 
 1. Complete 'Copy and Edit' steps to produce a successful container with your software package
