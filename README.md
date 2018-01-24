@@ -30,6 +30,8 @@ Ex: `fredhutch/ls2_r:3.4.3` or `fredhutch/ls2_ubuntu:16.04_20180118`
 
 Package versions should generally be the released version, and use the optional 'date' area for private sub-versions.
 
+Git tags and container tags should match.
+
 ## Container Architecture
 * default user 'neo' (UID 500, GID 500) /home/neo
 * Lmod and EasyBuild are installed into /app
@@ -69,14 +71,21 @@ Copy this repo per [these instructions](https://help.github.com/articles/duplica
 1. `git push --mirror https://github.com/<new repo URL.git>`
 1. `cd ..`
 1. `rm -rf ls2.git`
+1. `git clone <new_repo>`
+1. `cd <new_repo>`
+1. `git submodule init`
+1. `git submodule update --remote`
 
 At this point, there are two options:
 *  Building an existing easyconfig from the [EasyBuild EasyConfig Repo](https://github.com/easybuilders/easybuild-easyconfigs)
   1. Edit the Dockerfile to adjust the following:
     * EASYCONFIG_NAME - this is the name of the package to be built
     * INSTALL_OS_PKGS - these packages will be installed (by root) prior to running EasyBuild (use this for 'osdependencies')
-  1. Run `docker build . --target ls2 -t <tag>` (ensure you are logged into Dockerhub by running `docker login`)
+  1. Run `docker build . -t <tag>` (ensure you are logged into Dockerhub by running `docker login`)
   1. Run `docker push <tag>`
+  1. Add/Commit/Push your repo to github
+  1. Run `git tag <tag>`
+  1. Run `git push <tag>`
 
 * Building a custom Easyconfig
   1. Add required EasyConfig files that are not in the EasyBuild repo to /easyconfigs in new repo
@@ -86,14 +95,14 @@ At this point, there are two options:
     * EASYCONFIG_NAME - this is the name of the package to be built
     * INSTALL_OS_PKGS - these packages will be installed (by root) prior to running EasyBuild
     * UNINSTALL_OS_PKGS - these packages will be uninstalled at the end of running EasyBuild
-  1. Run `docker build . --target ls2 -t <tag>` (ensure you are logged in to Dockerhub by running `docker login`)
+  1. Run `docker build . -t <tag>` (ensure you are logged in to Dockerhub by running `docker login`)
   1. Run `docker push <tag>`
 
 ## Second Add to /app (FYI - Work In Progress 01.24.2018)
 We keep our deployed software package on an NFS volume that we mount at /app on our systems (can you guess why LS2 builds into /app rather than .local in the container?). In order to use your recently build LS2 software package container to deploy the same package into our /app NFS volume, use these steps:
 
 1. Complete 'Copy and Edit' steps to produce a successful container with your software package
-1. Run `docker build` once again, this time with `--target fh_deploy` - this will run quickly and build a second container
+1. Run `docker build . -f Dockerfile.deploy -t <tag>_fh_deploy` once again - this will run quickly and build a second container
 1. Run that container with our package deploy location mapped in to /app like this: `docker run ls2_r_fh_deploy -v /app:/app`
 
 The steps above will produce a container with EasyBuild and all the pieces necessary, with the actual EasyBuild command set as the entrypoint. Running the container will trigger the EasyBuild run, and the resulting output will be placed into the /app volume outside the container.
