@@ -57,7 +57,8 @@ ENTRYPOINT apt-get update -y && apt-get install -y $INSTALL_OS_PKGS && \
     su -c ". /app/lmod/lmod/init/bash && \
            module use /app/modules/all && \
            module load EasyBuild && \
-           eb -l $EASYCONFIG_NAME --robot" - neo && \
+           eb -l $EASYCONFIG_NAME --robot && \
+           /app/lmod/lmod/libexec/update_lmod_system_cache_files $MODULEPATH" - neo && \
     apt-get remove -y --purge $UNINSTALL_OS_PKGS && \
     apt-get autoremove -y
 USER neo
