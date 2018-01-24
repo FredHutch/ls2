@@ -85,7 +85,7 @@ At this point, there are two options:
   1. Run `docker push <tag>`
   1. Add/Commit/Push your repo to github
   1. Run `git tag <tag>`
-  1. Run `git push <tag>`
+  1. Run `git push origin <tag>`
 
 * Building a custom Easyconfig
   1. Add required EasyConfig files that are not in the EasyBuild repo to /easyconfigs in new repo
