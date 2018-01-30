@@ -63,7 +63,7 @@ We use EasyBuild to install software packages onto an NFS volume. This volume is
 # HOWTO
 There are two sections here. First case covers building an existing or new EasyConfig, and the second covers using a built container to deploy a software package to an existing software archive or volume.
 
-## First Copy and Edit
+## Building...
 Steps to build a new LS2 container are pretty straight-forward, but assume some knowledge of EasyBuild, Lmod, and Docker.
 
 ### Existing easyconfigs
