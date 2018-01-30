@@ -2,7 +2,7 @@
 Life Sciences Software
 
 # Overview
-The Life Sciences Software (LS2) project aims to normalize the build of software packages across multiple technologies.
+The Life Sciences Software (LS2) project aims to normalize and automate the build of software packages across multiple technologies.
 
 ## Components
 LS2 is a collection of open source components:
@@ -18,10 +18,12 @@ This is the hierarchy of LS2 containers:
 Name/Repo | FROM | Reason | Notes
 --- | --- | --- | ---
 <https://github.com/FredHutch/ls2_ubuntu> | ubuntu | simple 'freeze' of the public ubuntu container | OS pkgs added: bash, curl, git
-<https://github.com/FredHutch/ls2_easybuild> | ls2_ubuntu | Adding EasyBuild and Lmod | OS pkgs added: python, lua
-<https://github.com/FredHutch/ls2_easybuild_foss> | ls2_easybuild | Adding the 'foss' toolchain | OS pkgs added: libibverbs-dev, lib6c-dev, bzip2, unzip, make, xz-utils
-<https://github.com/FredHutch/ls2> | ls2_easybuild_foss | This 'demo' repo | does not produce a container directly
-<https://github.com/FredHutch/ls2_r> | ls2_easybuild_foss | Our 'R' build | OS pkgs added: awscli
+<https://github.com/FredHutch/ls2_lmod> | ls2_ubuntu | Adding Lmod | OS pkgs added: lua
+<https://github.com/FredHutch/ls2_easybuild> | ls2_lmod | Adding EasyBuild | OS pkgs added: python
+<https://github.com/FredHutch/ls2_easybuild_toolchain> | ls2_easybuild | Adding EasyBuild toolchain(s) | OS pkgs added: libibverbs-dev, lib6c-dev, bzip2, unzip, make, xz-utils, awscli
+<https://github.com/FredHutch/ls2> | ls2_easybuild_toolchain | This 'demo' repo | does not produce a container directly
+<https://github.com/FredHutch/ls2_r> | ls2_easybuild_toolchain | Our 'R' build | easy_update.py, custom easyconfigs
+<https://github.com/FredHutch/ls2_python> | ls2_easybuild_toolchain | Our 'Python' build | easy_update.py, custom easyconfigs
 
 ### Tags
 In general, tagging goes: `fredhutch/ls2_<package name>:<package version>[_<date>]`
@@ -34,8 +36,9 @@ Git tags and container tags should match.
 
 ## Container Architecture
 * default user 'neo' (UID 500, GID 500) /home/neo
+* ls2 scripts are installed in /ls2
 * Lmod and EasyBuild are installed into /app
-* EasyConfigs are copied into /app/fh_easyconfigs
+* EasyConfigs from repo are copied into /app/fh_easyconfigs
 * sources are copied and downloaded into /app/sources
 * EasyBuild is run in a single 'RUN' command to reduce container layer size:
   * installs specified OS packages
@@ -63,7 +66,15 @@ There are two sections here. First case covers building an existing or new EasyC
 ## First Copy and Edit
 Steps to build a new LS2 container are pretty straight-forward, but assume some knowledge of EasyBuild, Lmod, and Docker.
 
-Copy this repo per [these instructions](https://help.github.com/articles/duplicating-a-repository/):
+### Existing easyconfigs
+If you are wanting to build an existing easyconfig (from the EasyBuild [easyconfig repo](https://github.com/easybuilders/easybuild--easyconfigs), you should follow these steps:
+
+1. clone the FredHutch/ls2 repo
+1. run `docker build . --tag ls2_<eb_pkg_name>:<eb_pkg_ver> --build-arg EB_NAME=<eb_file_name_without_dot_eb> (this will build the container)
+1. run `docker push ls2_<eb_pkg_name>:<eb_pkg_ver>` (this will push to dockerhub and make available for use)
+
+### Custom easyconfigs
+If you want to customize the config (edit the .eb file) then copy this repo per [these instructions](https://help.github.com/articles/duplicating-a-repository/):
 1. create a new repo in github and do not pre-populate with README.md - this should get you the 'Quick setup' page
 1. `git clone --bare https://github.com/FredHutch/ls2.git` (or `git clone --bare ssh://git@github.com/FredHutch/ls2.git`)
 1. `cd ls2.git`
@@ -73,39 +84,21 @@ Copy this repo per [these instructions](https://help.github.com/articles/duplica
 1. `rm -rf ls2.git`
 1. `git clone <new_repo>`
 1. `cd <new_repo>`
-1. `git submodule init`
-1. `git submodule update --remote`
-
-At this point, there are two options:
-*  Building an existing easyconfig from the [EasyBuild EasyConfig Repo](https://github.com/easybuilders/easybuild-easyconfigs)
-  1. Edit the Dockerfile to adjust the following:
-    * EASYCONFIG_NAME - this is the name of the package to be built
-    * INSTALL_OS_PKGS - these packages will be installed (by root) prior to running EasyBuild (use this for 'osdependencies')
-  1. Run `docker build . -t <tag>` (ensure you are logged into Dockerhub by running `docker login`)
-  1. Run `docker push <tag>`
-  1. Add/Commit/Push your repo to github
-  1. Run `git tag <tag>`
-  1. Run `git push origin <tag>`
-
-* Building a custom Easyconfig
-  1. Add required EasyConfig files that are not in the EasyBuild repo to /easyconfigs in new repo
-  1. Add sources to the sources/ folder of the repo (for sources <50MB in size that cannot easily be downloaded)
-  1. Add URLs to sources/download_sources.sh to download sources during `docker build` (for larger sources, perhaps placed in the cloud for easier download)
-  1. Edit the Dockerfile to adjust the following:
-    * EASYCONFIG_NAME - this is the name of the package to be built
-    * INSTALL_OS_PKGS - these packages will be installed (by root) prior to running EasyBuild
-    * UNINSTALL_OS_PKGS - these packages will be uninstalled at the end of running EasyBuild
-  1. Run `docker build . -t <tag>` (ensure you are logged in to Dockerhub by running `docker login`)
-  1. Run `docker push <tag>`
+1. Add required EasyConfig files that are not in the EasyBuild repo to /easyconfigs in new repo
+1. Add sources to the sources/ folder of the repo (for sources <50MB in size that cannot easily be downloaded)
+1. Add URLs to sources/download_sources.sh to download sources during `docker build` (for larger sources, perhaps placed in the cloud for easier download)
+1. Edit the Dockerfile to adjust the following:
+  * INSTALL_OS_PKGS - these packages will be installed (by root) prior to running EasyBuild
+  * UNINSTALL_OS_PKGS - these packages will be uninstalled at the end of running EasyBuild
+1. Run `docker build . --tag ls2_<eb_pkg_name>:<eb_pkg_ver>` (ensure you are logged in to Dockerhub by running `docker login`)
+1. Run `docker push ls2_<eb_pkg_name>:<eb_pkg_ver>`
 
 ## Second Add to /app (FYI - Work In Progress 01.24.2018)
 We keep our deployed software package on an NFS volume that we mount at /app on our systems (can you guess why LS2 builds into /app rather than .local in the container?). In order to use your recently build LS2 software package container to deploy the same package into our /app NFS volume, use these steps:
 
-1. Complete 'Copy and Edit' steps to produce a successful container with your software package
-1. Run `docker build . -f Dockerfile.deploy -t <tag>_fh_deploy` once again - this will run quickly and build a second container
-1. Run that container with our package deploy location mapped in to /app like this: `docker run ls2_r_fh_deploy -v /app:/app`
+1. Complete above steps to produce a successful container with your software package
+1. Run that container with our package deploy location mapped in to /app like this: `docker run -ti --rm --user root -v /app:/app -e OUT_UID=${UID} -e out_GID=<outside GID> ls2_<eb_pkg_name>:<eb_pkg_ver> /bin/bash /ls2/deploy.sh`
 
-The steps above will produce a container with EasyBuild and all the pieces necessary, with the actual EasyBuild command set as the entrypoint. Running the container will trigger the EasyBuild run, and the resulting output will be placed into the /app volume outside the container.
+The steps above will use the container you just built, but will build the easyconfig into "real" /app, using Lmod, EasyBuild, and dependent packages from the "real" /app.
 
-Note that this overrides the Lmod in the container, so if version parity is important to you, you'll want to keep your Lmod in sync with the LS2 Lmod.
-
+Note that this overrides the Lmod in the container, so if version parity is important to you, you'll want to keep your /app Lmod in sync with the LS2 Lmod.
