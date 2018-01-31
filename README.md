@@ -97,7 +97,7 @@ If you want to customize the config (edit the .eb file) then copy this repo per 
 We keep our deployed software package on an NFS volume that we mount at /app on our systems (can you guess why LS2 builds into /app rather than .local in the container?). In order to use your recently build LS2 software package container to deploy the same package into our /app NFS volume, use these steps:
 
 1. Complete above steps to produce a successful container with your software package
-1. Run that container with our package deploy location mapped in to /app like this: `docker run -ti --rm --user root -v /app:/app -e OUT_UID=${UID} -e out_GID=<outside GID> ls2_<eb_pkg_name>:<eb_pkg_ver> /bin/bash /ls2/deploy.sh`
+1. Run that container with our package deploy location mapped in to /app like this: `docker run -ti --rm --user root -v /app:/app -e OUT_UID=${UID} -e OUT_GID=<outside GID=158372> ls2_<eb_pkg_name>:<eb_pkg_ver> /bin/bash /ls2/deploy.sh`
 
 The steps above will use the container you just built, but will build the easyconfig into "real" /app, using Lmod, EasyBuild, and dependent packages from the "real" /app.
 
