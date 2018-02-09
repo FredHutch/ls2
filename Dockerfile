@@ -1,32 +1,41 @@
-FROM fredhutch/ls2_easybuild_foss:2016b
+FROM fredhutch/ls2_easybuild_toolchain:foss-2016b
 
-# easyconfig to build 
-ENV EASYCONFIG_NAME my_best_easyconfig.eb
-# required OS packages for the build
-ENV INSTALL_OS_PKGS "awscli build-essential pkg-config libssl-dev unzip libc6-dev"
+# Remember the default use is LS2_USERNAME, not root
+
+# DEPLOY_PREFIX comes from ls2_lmod container, two containers up!
+
+# easyconfig to build - leave '.eb' off
+ARG EB_NAME
+ENV EB_NAME=${EB_NAME}
+
+# libibverbs required for foss toolchains
+ENV INSTALL_OS_PKGS ""
+
 # os pkg list to be removed after the build - in EasyBuild, the 'dummy' toolchain requires build-essential
 # also, the current toolchain we are using (foss-2016b) does not actually include 'make'
 # removing build-essential will mean the resulting container cannot build additional software
-ENV UNINSTALL_OS_PKGS "build-essential"
-# switch to our non-root user
-USER neo
-# copy in AWS Batch's "fetch-and-run" for S3-based scripts
-COPY aws-batch-helpers/fetch-and-run/fetch_and_run.sh /home/neo/fetch_and_run.sh
-# copy in easyconfigs (so many due to missing dependencies in existing easyconfigs)
-COPY easyconfigs/* /app/fh_easyconfigs/
-# R sources that cannot be programmatically downloaded
-COPY sources/* /app/sources/
-# run script to download larger sources
-RUN /bin/bash /app/sources/download_sources.sh
-# install build-essential, build R, remove build-essential
-# EVERYTHING beyond build-essential needs to be moved into EB!!!
+ENV UNINSTALL_OS_PKGS ""
+
+# copy install and deploy scripts in
+COPY install.sh /ls2/
+COPY deploy.sh /ls2/
+
+# install and uninstall build-essential in one step to reduce layer size
+# while installing Lmod, again must be root
 USER root
-RUN apt-get update -y && apt-get install -y $INSTALL_OS_PKGS && \
-    su -c ". /app/lmod/lmod/init/bash && \
-           module use /app/modules/all && \
-           module load EasyBuild && \
-           eb -l $EASYCONFIG_NAME --robot" - neo && \
-    apt-get remove -y --purge $UNINSTALL_OS_PKGS && \
-    apt-get autoremove -y
-USER neo
+RUN DEBIAN_FRONTEND=noninteractive \
+    apt-get update -y \
+    && apt-get install -y ${INSTALL_OS_PKGS} \
+    && su -c "/bin/bash /ls2/install.sh" ${LS2_USERNAME} \
+    && AUTO_ADDED_PKGS=$(apt-mark showauto) apt-get remove -y --purge ${UNINSTALL_OS_PKGS} ${AUTO_ADDED_PKGS} \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+
+# gather installed pkgs list
+RUN dpkg -l > /ls2/installed_pkgs.${EB_NAME}
+
+# switch to LS2 user for future actions
+USER ${LS2_USERNAME}
+WORKDIR /home/${LS2_USERNAME}
+SHELL ["/bin/bash", "-c"]
 
