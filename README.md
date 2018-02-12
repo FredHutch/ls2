@@ -104,3 +104,5 @@ We keep our deployed software package on an NFS volume that we mount at /app on 
 The steps above will use the container you just built, but will re-build the easyconfig and all dependencies into the "real" /app, using Lmod, EasyBuild, and dependent packages from the "real" /app.
 
 Note that this overrides the Lmod in the container, so if version parity is important to you, you'll always want to keep your /app Lmod in sync with the LS2 Lmod. You can deploy Lmod to /app using the [LS2 Lmod repo](https://github.com/FredHutch/ls2_lmod).
+
+Details: take a look into the scritps, but this procedure re-runs the build step from the Dockerfile as root in order to install/uninstall OS packages, and adjusts the uid/gid to match your deployment outside the container.
