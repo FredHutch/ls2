@@ -95,7 +95,7 @@ If you want to customize the config (edit the .eb file) then copy this repo (tak
 1. Run `docker build . --tag [ls2_]<eb_pkg_name>:<eb_pkg_ver>`
 1. Run `docker push ls2_<eb_pkg_name>:<eb_pkg_ver>`  (ensure you are logged in to Dockerhub by running `docker login`)
 
-## Deploy new software packge to /app (our NFS software archive)
+## Deploy new software package to /app (our NFS software archive)
 We keep our deployed software package on an NFS volume that we mount at /app on our systems (can you guess why LS2 builds into /app rather than .local in the container?). In order to use your recently build LS2 software package container to deploy the same package into our /app NFS volume, use these steps:
 
 1. Complete above steps to produce a successful container with your software package
