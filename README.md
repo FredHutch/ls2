@@ -4,6 +4,20 @@ Life Sciences Software
 # Overview
 The Life Sciences Software (LS2) project aims to normalize and automate the build of software packages across multiple technologies.
 
+## Using a container
+You can pull and run any container listed in any of the ls2 subrepositories linked below from Docker Hub.
+
+The container will have Lmod and an environment module for the contained software. The naming convention of the environment modules will follow the ls2 name.
+
+In order to use the software in the container, it is necessary to load Lmod and the environment module like this:
+```
+source /app/Lmod/lmod/init/bash
+module use /app/modules/all
+module load <module name>
+```
+_Ex: For R-3.4.3-foss-2016b-fh2, run `module load R/3.4.3-foss-2016b-fh2`_
+Some container also have wrapper scripts to automate this for you.
+
 ## Components
 LS2 is a collection of open source components:
 
