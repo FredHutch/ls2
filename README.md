@@ -2,7 +2,7 @@
 Life Sciences Software
 
 # Overview
-The Life Sciences Software (LS2) project aims to normalize and automate the build of software packages across multiple technologies.
+The Life Sciences Software (LS2) project aims to normalize and automate the build of software packages across multiple technologies. We use this method along with [EasyBuild](https://easybuilders.github.io/easybuild/) to manage our software install archive. Details can be found [here](https://fredhutch.github.io/easybuild-life-sciences/).
 
 ## Using a container
 You can pull and run any container listed in any of the ls2 subrepositories linked below from Docker Hub.
