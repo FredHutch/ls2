@@ -6,7 +6,7 @@ set -x
 set -e
 
 groupadd -g $OUT_GID outside_group
-useradd -u $OUT_UID -g outside_group outside_user 
+useradd -u $OUT_UID -m -g outside_group outside_user 
 
 apt-get update -y
 apt-get install -y build-essential

@@ -1,4 +1,4 @@
-FROM fredhutch/ls2_easybuild_toolchain:foss-2016b
+FROM fredhutch/ls2_easybuild_toolchain:foss-2018b
 
 # Remember the default use is LS2_USERNAME, not root
 
@@ -19,7 +19,7 @@ ENV UNINSTALL_OS_PKGS ""
 # copy install and deploy scripts in
 COPY install.sh /ls2/
 COPY deploy.sh /ls2/
-COPY download_sources.sh /ls2/
+COPY sources/download_sources.sh /ls2/
 COPY easyconfigs/* /app/fh_easyconfigs/
 COPY sources/* /app/sources/
 RUN /bin/bash /ls2/download_sources.sh
