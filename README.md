@@ -113,7 +113,7 @@ If you want to customize the config (edit the .eb file) then copy this repo (tak
 We keep our deployed software package on an NFS volume that we mount at /app on our systems (can you guess why LS2 builds into /app rather than .local in the container?). In order to use your recently build LS2 software package container to deploy the same package into our /app NFS volume, use these steps:
 
 1. Complete above steps to produce a successful container with your software package
-1. Run that container with our package deploy location mapped in to /app like this: `docker run -ti --rm --user root -v /app:/app -e OUT_UID=${UID} -e OUT_GID=<outside GID=158372> fredhutch/ls2_<eb_pkg_name>:<eb_pkg_ver> /bin/bash /ls2/deploy.sh`
+1. Run that container with our package deploy location mapped in to /app like this: ```docker run -ti --rm --user root -v /app:/app -e OUT_UID=${UID} -e OUT_GID=<outside GID=158372> fredhutch/ls2_<eb_pkg_name>:<eb_pkg_ver> /bin/bash /ls2/deploy.sh```
 
 The steps above will use the container you just built, but will re-build the easyconfig and all dependencies into the "real" /app, using Lmod, EasyBuild, and dependent packages from the "real" /app.
 
@@ -122,3 +122,30 @@ Note that this overrides the Lmod in the container, so if version parity is impo
 Details: take a look into the scritps, but this procedure re-runs the build step from the Dockerfile as root in order to install/uninstall OS packages, and adjusts the uid/gid to match your deployment outside the container.
 
 Assumptions: /app exists, and you have already deployed the EasyBuild package into /app.
+
+## FAQ on the ls2 deploy step?
+Do I need to do this step?
+
+No, once the initial container build is done, you have a container with the specified software pacakge(s) built and installed.
+
+Why a second deploy step?
+
+We use an NFS-mounted software volume to ensure our software is consistent across our HPC cluster and other Linux systems. This is the method we use to ensure the same software builds are present on our software volume and in ls2containers.
+
+Why do the outside_vol and "inside" outside_vol have to match?
+
+Paths will be coded into the installed modulesfiles, so locations must be the same everywhere.
+
+What are OUT_UID and stuff?
+
+You will want the files written outside the container (in software volume) to be written by an owner and a group that make sense outside the container. Also, for collaboration (multiple builders if you choose), a common group is required. Note also that OUT_PREFIX and <outside_vol> must match
+
+What about multiple builders (building under user accounts)?
+
+You will want to have all builder accounts be members of the same group. That group should own your PREFIX (ex: /app) folder, and that folder should have the setgid bit set (ex: chmod g+s /app).
+
+Ben, I work with you and just want to update this software package!
+
+Ok, to simple update the software version, run these commands:
+
+
